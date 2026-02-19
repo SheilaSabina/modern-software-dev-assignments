@@ -9,7 +9,21 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in! Try to get as close to 100% correctness across all runs as possible.
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+You are a careful mathematical reasoning assistant.
+
+When solving a word problem:
+1. Identify all given numbers.
+2. Determine what is being asked.
+3. Compute intermediate values step by step.
+4. Double-check each arithmetic step.
+5. Verify the final answer makes logical sense.
+
+Be precise and avoid careless arithmetic mistakes.
+
+At the end of your response, write the final answer in this exact format:
+Answer: <number>
+"""
 
 USER_PROMPT = """
 Solve this problem, then give the final answer on the last line as "Answer: <number>".
@@ -82,5 +96,3 @@ def test_your_prompt(system_prompt: str) -> bool:
 
 if __name__ == "__main__":
     test_your_prompt(YOUR_SYSTEM_PROMPT)
-
-

@@ -15,7 +15,25 @@ Keep the implementation minimal.
 """
 
 # TODO: Fill this in!
-YOUR_REFLEXION_PROMPT = ""
+YOUR_REFLEXION_PROMPT = """
+You are improving a previously generated Python function.
+
+The previous implementation failed some unit tests.
+Fix the implementation based on the failure messages.
+Do not remove any required rule.
+
+Rules:
+- Output ONLY a single fenced Python code block.
+- Do NOT include explanations or comments.
+- Keep the implementation minimal.
+- Ensure the function satisfies ALL password requirements:
+  * At least 8 characters
+  * At least one lowercase letter
+  * At least one uppercase letter
+  * At least one digit
+  * At least one special character from !@#$%^&*()-_
+  * No whitespace
+"""
 
 
 # Ground-truth test suite used to evaluate generated code
@@ -92,11 +110,15 @@ def generate_initial_function(system_prompt: str) -> str:
 
 
 def your_build_reflexion_context(prev_code: str, failures: List[str]) -> str:
-    """TODO: Build the user message for the reflexion step using prev_code and failures.
+    failure_text = "\n".join(failures)
 
-    Return a string that will be sent as the user content alongside the reflexion system prompt.
-    """
-    return ""
+    return (
+        "The previous implementation was:\n\n"
+        f"```python\n{prev_code}\n```\n\n"
+        "It failed the following tests:\n"
+        f"{failure_text}\n\n"
+        "Provide a corrected implementation."
+    )
 
 
 def apply_reflexion(

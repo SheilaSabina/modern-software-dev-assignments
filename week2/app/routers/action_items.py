@@ -1,50 +1,51 @@
-from __future__ import annotations
-
-from typing import Any, Dict, List, Optional
+from typing import List
 
 from fastapi import APIRouter, HTTPException
 
-from .. import db
-from ..services.extract import extract_action_items
+from .. import schemas
+
+# Import layanan
+from ..services import db, extract
+
+# Kita ubah prefix jadi /notes karena action items menempel pada notes
+router = APIRouter(prefix="/notes", tags=["action_items"])
 
 
-router = APIRouter(prefix="/action-items", tags=["action-items"])
+# --- FITUR 1: EKSTRAKSI BIASA (REGEX) ---
+@router.post("/{note_id}/extract", response_model=List[schemas.ActionItem])
+def extract_action_items(note_id: int):
+    """
+    Ekstraksi menggunakan Regex (Cara Lama).
+    """
+    note = db.get_note(note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+
+    # Panggil fungsi lama di extract.py
+    texts = extract.extract_action_items(note["content"])
+
+    # Simpan ke DB
+    db.insert_action_items(texts, note_id)
+
+    # Return sesuai format Schema
+    return [{"description": t} for t in texts]
 
 
-@router.post("/extract")
-def extract(payload: Dict[str, Any]) -> Dict[str, Any]:
-    text = str(payload.get("text", "")).strip()
-    if not text:
-        raise HTTPException(status_code=400, detail="text is required")
+# --- FITUR 2: EKSTRAKSI AI (LLM) - TODO 1 & 4 ---
+@router.post("/{note_id}/extract-llm", response_model=List[schemas.ActionItem])
+def extract_action_items_llm_endpoint(note_id: int):
+    """
+    Ekstraksi menggunakan AI / Ollama (Cara Baru).
+    """
+    note = db.get_note(note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
 
-    note_id: Optional[int] = None
-    if payload.get("save_note"):
-        note_id = db.insert_note(text)
+    # Panggil fungsi LLM di extract.py
+    texts = extract.extract_action_items_llm(note["content"])
 
-    items = extract_action_items(text)
-    ids = db.insert_action_items(items, note_id=note_id)
-    return {"note_id": note_id, "items": [{"id": i, "text": t} for i, t in zip(ids, items)]}
+    # Simpan ke DB
+    db.insert_action_items(texts, note_id)
 
-
-@router.get("")
-def list_all(note_id: Optional[int] = None) -> List[Dict[str, Any]]:
-    rows = db.list_action_items(note_id=note_id)
-    return [
-        {
-            "id": r["id"],
-            "note_id": r["note_id"],
-            "text": r["text"],
-            "done": bool(r["done"]),
-            "created_at": r["created_at"],
-        }
-        for r in rows
-    ]
-
-
-@router.post("/{action_item_id}/done")
-def mark_done(action_item_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
-    done = bool(payload.get("done", True))
-    db.mark_action_item_done(action_item_id, done)
-    return {"id": action_item_id, "done": done}
-
-
+    # Return sesuai format Schema
+    return [{"description": t} for t in texts]

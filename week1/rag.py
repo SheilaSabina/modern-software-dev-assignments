@@ -37,8 +37,16 @@ QUESTION = (
 
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+You are a careful software engineer.
 
+You must follow these rules:
+- Use ONLY the provided context.
+- Do NOT invent any URLs, headers, or API details.
+- If information is missing from the context, do not guess.
+- Output ONLY a single fenced Python code block.
+- Do not include explanations.
+"""
 
 # For this simple example
 # For this coding task, validate by required snippets rather than exact string
@@ -52,11 +60,7 @@ REQUIRED_SNIPPETS = [
 
 
 def YOUR_CONTEXT_PROVIDER(corpus: List[str]) -> List[str]:
-    """TODO: Select and return the relevant subset of documents from CORPUS for this task.
-
-    For example, return [] to simulate missing context, or [corpus[0]] to include the API docs.
-    """
-    return []
+    return corpus
 
 
 def make_user_prompt(question: str, context_docs: List[str]) -> str:

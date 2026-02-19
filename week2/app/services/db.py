@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
-from typing import Optional
-
+from typing import Any, Dict, List, Optional
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = BASE_DIR / "data"
@@ -17,7 +16,7 @@ def ensure_data_directory_exists() -> None:
 def get_connection() -> sqlite3.Connection:
     ensure_data_directory_exists()
     connection = sqlite3.connect(DB_PATH)
-    connection.row_factory = sqlite3.Row
+    connection.row_factory = sqlite3.Row  # Ini penting agar akses kolom pakai nama
     return connection
 
 
@@ -57,14 +56,18 @@ def insert_note(content: str) -> int:
         return int(cursor.lastrowid)
 
 
-def list_notes() -> list[sqlite3.Row]:
+def list_notes() -> List[Dict[str, Any]]:
+    """Mengambil semua catatan (Refactored untuk return Dict)."""
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT id, content, created_at FROM notes ORDER BY id DESC")
-        return list(cursor.fetchall())
+        rows = cursor.fetchall()
+        # Konversi ke dictionary agar aman untuk FastAPI
+        return [dict(row) for row in rows]
 
 
-def get_note(note_id: int) -> Optional[sqlite3.Row]:
+def get_note(note_id: int) -> Optional[Dict[str, Any]]:
+    """Mengambil satu catatan (Refactored untuk return Dict)."""
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
@@ -72,7 +75,9 @@ def get_note(note_id: int) -> Optional[sqlite3.Row]:
             (note_id,),
         )
         row = cursor.fetchone()
-        return row
+        if row:
+            return dict(row)
+        return None
 
 
 def insert_action_items(items: list[str], note_id: Optional[int] = None) -> list[int]:
@@ -87,30 +92,3 @@ def insert_action_items(items: list[str], note_id: Optional[int] = None) -> list
             ids.append(int(cursor.lastrowid))
         connection.commit()
         return ids
-
-
-def list_action_items(note_id: Optional[int] = None) -> list[sqlite3.Row]:
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        if note_id is None:
-            cursor.execute(
-                "SELECT id, note_id, text, done, created_at FROM action_items ORDER BY id DESC"
-            )
-        else:
-            cursor.execute(
-                "SELECT id, note_id, text, done, created_at FROM action_items WHERE note_id = ? ORDER BY id DESC",
-                (note_id,),
-            )
-        return list(cursor.fetchall())
-
-
-def mark_action_item_done(action_item_id: int, done: bool) -> None:
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        cursor.execute(
-            "UPDATE action_items SET done = ? WHERE id = ?",
-            (1 if done else 0, action_item_id),
-        )
-        connection.commit()
-
-

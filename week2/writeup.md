@@ -9,11 +9,11 @@ Fill out all of the `TODO`s in this file.
 
 ## SUBMISSION DETAILS
 
-Name: **TODO** \
-SUNet ID: **TODO** \
-Citations: **TODO**
+Name: Sheila Sabina \
+SUNet ID: 2310817220028 \
+Citations: N/A
 
-This assignment took me about **TODO** hours to do. 
+This assignment took me about 4-6 hours to do. 
 
 
 ## YOUR RESPONSES
@@ -21,60 +21,43 @@ For each exercise, please include what prompts you used to generate the answer, 
 
 ### Exercise 1: Scaffold a New Feature
 Prompt: 
-```
-TODO
-``` 
+I want to perform TODO 1. Implement LLM extraction using Ollama in services/extract.py. The prompt should be flexible to detect the input language and return a JSON list of action items.
 
 Generated Code Snippets:
-```
-TODO: List all modified code files with the relevant line numbers.
-```
+week2/app/services/extract.py: Line 85-130 (fungsi extract_action_items_llm).
 
 ### Exercise 2: Add Unit Tests
 Prompt: 
-```
-TODO
-``` 
+Generate unit tests for the extraction service in tests/test_extract.py to ensure both Regex and LLM extraction work for various Indonesian and English inputs.
 
 Generated Code Snippets:
-```
-TODO: List all modified code files with the relevant line numbers.
-```
+week2/tests/test_extract.py: All line.
 
 ### Exercise 3: Refactor Existing Code for Clarity
 Prompt: 
-```
-TODO
-``` 
+I want to perform TODO 3. Refactor week2/app/main.py and its routers to use FastAPI lifespan, ensure Pydantic schemas are used for all endpoints, and clean up the database layer to return dictionaries.
 
 Generated/Modified Code Snippets:
-```
-TODO: List all modified code files with the relevant line numbers. (We anticipate there may be multiple scattered changes here – just produce as comprehensive of a list as you can.)
-```
+- week2/app/main.py: Line 1-40 (lifespan implementation).
+- week2/app/routers/notes.py: Use of Pydantic models.
+- week2/app/services/db.py: Added dict(row) to fetch data.
 
 
 ### Exercise 4: Use Agentic Mode to Automate a Small Task
 Prompt: 
-```
-TODO
-``` 
+Improve the frontend in week2/frontend/index.html with a premium blue theme. Add a custom delete modal and top-center toast notifications for success messages
 
 Generated Code Snippets:
-```
-TODO: List all modified code files with the relevant line numbers.
-```
+- week2/frontend/index.html: Line 10-150 (CSS & Modal/Toast Logic).
+- week2/app/routers/notes.py: Added endpoint @router.delete("/{note_id}").
 
 
 ### Exercise 5: Generate a README from the Codebase
 Prompt: 
-```
-TODO
-``` 
+Generate a comprehensive README.md for this Week 2 project based on the current codebase, explaining how to run the FastAPI server and use the AI extraction features.
 
 Generated Code Snippets:
-```
-TODO: List all modified code files with the relevant line numbers.
-```
+week2/README.md: All line.
 
 
 ## SUBMISSION INSTRUCTIONS

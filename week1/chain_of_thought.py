@@ -8,7 +8,18 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """You are a precise mathematical assistant. 
+To solve modular exponentiation problems, you must use a Chain of Thought approach:
+1. Identify the modulus (n) and the base.
+2. Check if the base and modulus are coprime.
+3. Apply Euler's Totient Theorem: find phi(n).
+4. Reduce the exponent using the property: a^b mod n = a^(b mod phi(n)) mod n.
+5. Calculate the remaining power step-by-step using smaller powers or patterns.
+6. Double-check your arithmetic.
+
+Your response must show this reasoning process clearly. 
+At the very end of your response, provide the final result in this exact format:
+Answer: <number>"""
 
 
 USER_PROMPT = """
@@ -68,5 +79,3 @@ def test_your_prompt(system_prompt: str) -> bool:
 
 if __name__ == "__main__":
     test_your_prompt(YOUR_SYSTEM_PROMPT)
-
-

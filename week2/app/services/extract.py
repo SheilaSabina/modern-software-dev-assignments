@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-import os
+import json
 import re
 from typing import List
-import json
-from typing import Any
-from ollama import chat
+
 from dotenv import load_dotenv
+from ollama import chat
 
 load_dotenv()
 
+# --- LOGIKA LAMA (REGEX & HEURISTIC) ---
 BULLET_PREFIX_PATTERN = re.compile(r"^\s*([-*•]|\d+\.)\s+")
 KEYWORD_PREFIXES = (
     "todo:",
@@ -32,6 +32,9 @@ def _is_action_line(line: str) -> bool:
 
 
 def extract_action_items(text: str) -> List[str]:
+    """
+    Ekstraksi menggunakan pola regex dan kata kunci (Cara Lama).
+    """
     lines = text.splitlines()
     extracted: List[str] = []
     for raw_line in lines:
@@ -71,7 +74,6 @@ def _looks_imperative(sentence: str) -> bool:
     if not words:
         return False
     first = words[0]
-    # Crude heuristic: treat these as imperative starters
     imperative_starters = {
         "add",
         "create",
@@ -87,3 +89,50 @@ def _looks_imperative(sentence: str) -> bool:
         "investigate",
     }
     return first.lower() in imperative_starters
+
+# --- TODO 1: Implementasi LLM-powered extraction menggunakan Ollama ---
+# Bagian ini dibuat untuk mendeteksi action items secara cerdas dan fleksibel terhadap bahasa input.
+def extract_action_items_llm(text: str) -> List[str]:
+    """
+    Ekstraksi action items menggunakan LLM (Ollama).
+    Diperbaiki untuk menangkap tugas dari berbagai perspektif kalimat.
+    """
+
+    # Perbaikan pada System Prompt agar lebih mendetail
+    system_prompt = """
+    You are an expert secretary assistant. Your task is to identify and extract ALL action items, 
+    tasks, or commitments mentioned in the meeting notes.
+    
+    Guidelines:
+    1. Extract tasks assigned to others, personal commitments, and general todos.
+    2. ALWAYS respond in BAHASA INDONESIA. Do not translate the tasks to English.
+    3. Keep the descriptions concise but clear.
+    
+    Output Format:
+    - You MUST return a valid JSON object.
+    - Key: "action_items"
+    - Value: A list of strings.
+    - Example: {"action_items": ["beli camilan", "email klien"]}
+    """
+
+    try:
+        response = chat(
+            model="llama3.1:8b",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Extract action items from these notes:\n\n{text}"},
+            ],
+            # Menggunakan temperature sedikit lebih tinggi (0.3) agar AI lebih fleksibel
+            # memahami bahasa manusia, namun tetap terkontrol.
+            options={"temperature": 0.3},
+            format="json",
+        )
+
+        content = response.message.content
+        data = json.loads(content)
+
+        return data.get("action_items", [])
+
+    except Exception as e:
+        print(f"Error calling LLM: {e}")
+        return []

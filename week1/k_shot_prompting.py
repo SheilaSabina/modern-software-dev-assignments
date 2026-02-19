@@ -7,14 +7,32 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+Reverse the word exactly character by character.
+
+Example 1:
+Input: h t t p s t a t u s
+Output: s u t a t s p t t h
+Final: sutatsptth
+
+Example 2:
+Input: a b b a c
+Output: c a b b a
+Final: cabba
+
+Rules:
+- Reverse strictly from last character to first.
+- Keep all repeated letters.
+- Do not drop or duplicate characters.
+- The final answer must contain the same number of characters as the input.
+- Output only the final reversed word (like the "Final" examples).
+"""
 
 USER_PROMPT = """
 Reverse the order of letters in the following word. Only output the reversed word, no other text:
 
 httpstatus
 """
-
 
 EXPECTED_OUTPUT = "sutatsptth"
 
