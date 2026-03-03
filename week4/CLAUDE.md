@@ -1,0 +1,11 @@
+# Panduan Proyek Week 4
+- **Environment**: Windows 10/11 (PowerShell).
+- **Build System**: GNU Make 3.81.
+- **Perintah Utama**:
+  - Menjalankan App: `make run`
+  - Menjalankan Test: `make test`
+  - Linting: `make lint`
+- **Struktur Kode**:
+  - Backend: FastAPI di `backend/app/`.
+  - Database: SQLite di `data/dev.db`.
+- **Aturan**: Gunakan `black` untuk formatting dan `ruff` untuk linting sebelum melakukan commit.
