@@ -3,14 +3,29 @@ async function fetchJSON(url, options) {
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
-
 async function loadNotes() {
   const list = document.getElementById('notes');
   list.innerHTML = '';
   const notes = await fetchJSON('/notes/');
+  
   for (const n of notes) {
     const li = document.createElement('li');
-    li.textContent = `${n.title}: ${n.content}`;
+    
+    const span = document.createElement('span');
+    span.textContent = `${n.title}: ${n.content}`;
+    li.appendChild(span);
+
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'Delete';
+    delBtn.className = 'btn-delete';
+  delBtn.onclick = async () => {
+    if (confirm('Hapus catatan ini?')) {
+      await fetchJSON(`/notes/${n.id}`, { method: 'DELETE' }); 
+      loadNotes();
+    }
+  };
+    
+    li.appendChild(delBtn);
     list.appendChild(li);
   }
 }
