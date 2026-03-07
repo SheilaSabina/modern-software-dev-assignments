@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
@@ -11,10 +11,19 @@ from ..schemas import NoteCreate, NoteRead
 router = APIRouter(prefix="/notes", tags=["notes"])
 
 
-@router.get("/", response_model=list[NoteRead])
-def list_notes(db: Session = Depends(get_db)) -> list[NoteRead]:
-    rows = db.execute(select(Note)).scalars().all()
-    return [NoteRead.model_validate(row) for row in rows]
+@router.get("/")
+def list_notes(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    total = db.scalar(select(func.count()).select_from(Note))
+    rows = (
+        db.execute(select(Note).offset((page - 1) * page_size).limit(page_size))
+        .scalars()
+        .all()
+    )
+    return {"items": [NoteRead.model_validate(r) for r in rows], "total": total}
 
 
 @router.post("/", response_model=NoteRead, status_code=201)

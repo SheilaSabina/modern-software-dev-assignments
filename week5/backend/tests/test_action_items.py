@@ -2,15 +2,20 @@ def test_create_and_complete_action_item(client):
     payload = {"description": "Ship it"}
     r = client.post("/action-items/", json=payload)
     assert r.status_code == 201, r.text
-    item = r.json()
+    body = r.json()
+    assert body["ok"] is True
+    item = body["data"]
     assert item["completed"] is False
 
     r = client.put(f"/action-items/{item['id']}/complete")
     assert r.status_code == 200
-    done = r.json()
-    assert done["completed"] is True
+    body = r.json()
+    assert body["ok"] is True
+    assert body["data"]["completed"] is True
 
     r = client.get("/action-items/")
     assert r.status_code == 200
-    items = r.json()
-    assert len(items) == 1
+    body = r.json()
+    assert body["ok"] is True
+    assert body["data"]["total"] == 1
+    assert len(body["data"]["items"]) == 1
