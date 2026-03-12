@@ -5,8 +5,9 @@ from sqlalchemy import asc, desc, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..models import Note
+from ..models import Note, ActionItem
 from ..schemas import NoteCreate, NotePatch, NoteRead
+from ..services.extract import extract_action_items
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
@@ -40,6 +41,14 @@ def create_note(payload: NoteCreate, db: Session = Depends(get_db)) -> NoteRead:
     db.add(note)
     db.flush()
     db.refresh(note)
+    
+    # Extract action items and save them
+    action_texts = extract_action_items(note.content)
+    for text in action_texts:
+        action_item = ActionItem(note_id=note.id, text=text)
+        db.add(action_item)
+    db.flush()
+    
     return NoteRead.model_validate(note)
 
 
@@ -55,6 +64,17 @@ def patch_note(note_id: int, payload: NotePatch, db: Session = Depends(get_db)) 
     db.add(note)
     db.flush()
     db.refresh(note)
+    
+    # Delete existing action items for this note
+    db.query(ActionItem).filter(ActionItem.note_id == note_id).delete()
+    
+    # Extract new action items and save them
+    action_texts = extract_action_items(note.content)
+    for text in action_texts:
+        action_item = ActionItem(note_id=note.id, text=text)
+        db.add(action_item)
+    db.flush()
+    
     return NoteRead.model_validate(note)
 
 

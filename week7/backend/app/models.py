@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -22,6 +22,7 @@ class Note(Base, TimestampMixin):
 class ActionItem(Base, TimestampMixin):
     __tablename__ = "action_items"
 
-    id = Column(Integer, primary_key=True, index=True)
-    description = Column(Text, nullable=False)
-    completed = Column(Boolean, default=False, nullable=False)
+    id = Column(Integer, primary_key=True)
+    description = Column(String, nullable=False)
+    completed = Column(Boolean, default=False)
+    note_id = Column(Integer, ForeignKey("notes.id"))
