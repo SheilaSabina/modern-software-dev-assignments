@@ -1,14 +1,35 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy import asc, desc, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..models import Note
+from ..models import Note, ActionItem
 from ..schemas import NoteCreate, NotePatch, NoteRead
+from ..services.extract import extract_action_items
 
 router = APIRouter(prefix="/notes", tags=["notes"])
+
+
+def _handle_action_items(note_id: int, content: str, db: Session) -> None:
+    """Background task to extract and save action items for a note."""
+    try:
+        # Delete existing action items for this note
+        db.query(ActionItem).filter(ActionItem.note_id == note_id).delete()
+        
+        # Extract new action items and save them
+        action_texts = extract_action_items(content)
+        for text in action_texts:
+            action_item = ActionItem(note_id=note_id, text=text)
+            db.add(action_item)
+        
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise
+    finally:
+        db.close()
 
 
 @router.get("/", response_model=list[NoteRead])
@@ -35,16 +56,21 @@ def list_notes(
 
 
 @router.post("/", response_model=NoteRead, status_code=201)
-def create_note(payload: NoteCreate, db: Session = Depends(get_db)) -> NoteRead:
+def create_note(payload: NoteCreate, db: Session = Depends(get_db), background_tasks: BackgroundTasks = BackgroundTasks()) -> NoteRead:
     note = Note(title=payload.title, content=payload.content)
     db.add(note)
     db.flush()
     db.refresh(note)
+    db.commit()
+    
+    # Add background task to extract action items
+    background_tasks.add_task(_handle_action_items, note.id, note.content, db)
+    
     return NoteRead.model_validate(note)
 
 
 @router.patch("/{note_id}", response_model=NoteRead)
-def patch_note(note_id: int, payload: NotePatch, db: Session = Depends(get_db)) -> NoteRead:
+def patch_note(note_id: int, payload: NotePatch, db: Session = Depends(get_db), background_tasks: BackgroundTasks = BackgroundTasks()) -> NoteRead:
     note = db.get(Note, note_id)
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
@@ -55,6 +81,11 @@ def patch_note(note_id: int, payload: NotePatch, db: Session = Depends(get_db)) 
     db.add(note)
     db.flush()
     db.refresh(note)
+    db.commit()
+    
+    # Add background task to extract action items
+    background_tasks.add_task(_handle_action_items, note.id, note.content, db)
+    
     return NoteRead.model_validate(note)
 
 
