@@ -1,0 +1,10 @@
+﻿# Bolt app .gitignore
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+dist
+
+# Env files
+.env

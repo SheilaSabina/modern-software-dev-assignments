@@ -1,0 +1,12 @@
+﻿# Flask app .gitignore
+# Virtualenv
+venv/
+
+# Python cache
+__pycache__/
+
+# Flask instance folder
+instance/
+
+# Env files
+.env

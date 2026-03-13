@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Developer Control Center – Flask</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100">
+    <div class="mx-auto max-w-6xl px-4 py-10">
+      <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full bg-slate-900/60 px-3 py-1 text-xs text-slate-300 ring-1 ring-white/10">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+            <span>Online</span>
+          </div>
+          <h1 class="mt-4 text-3xl font-semibold tracking-tight md:text-4xl">
+            Developer Control Center
+            <span class="ml-2 text-sm font-normal text-slate-400">Flask edition</span>
+          </h1>
+          <p class="mt-2 max-w-2xl text-sm text-slate-300">
+            Catat ide cepat, simpan keputusan, dan buat daftar tugas dari satu dashboard yang rapi.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-10 grid gap-6 md:grid-cols-2">
+        <!-- Notes -->
+        <section class="rounded-2xl bg-slate-900/40 p-6 ring-1 ring-white/10">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Notes</h2>
+            <span class="rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-300 ring-1 ring-white/10">
+              {{ notes|length }} items
+            </span>
+          </div>
+
+          <form method="post" action="{{ url_for('add_note') }}" class="mt-4">
+            <label class="block text-sm text-slate-300">Tambah note</label>
+            <div class="mt-2 flex gap-2">
+              <input
+                name="content"
+                required
+                placeholder="Tulis catatan singkat…"
+                class="w-full rounded-xl bg-slate-950/60 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-500 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                type="submit"
+                class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                Add
+              </button>
+            </div>
+          </form>
+
+          <div class="mt-6 space-y-3">
+            {% if notes %}
+              {% for n in notes %}
+                <div class="rounded-xl bg-slate-950/50 p-4 ring-1 ring-white/10">
+                  <div class="text-sm text-slate-100">{{ n.content }}</div>
+                  <div class="mt-2 text-xs text-slate-400">
+                    {{ n.created_at.strftime("%Y-%m-%d %H:%M") }}
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="rounded-xl border border-dashed border-white/10 bg-slate-950/20 p-6 text-sm text-slate-400">
+                Belum ada note. Tambahkan note pertama kamu di atas.
+              </div>
+            {% endif %}
+          </div>
+        </section>
+
+        <!-- Tasks -->
+        <section class="rounded-2xl bg-slate-900/40 p-6 ring-1 ring-white/10">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Tasks</h2>
+            <span class="rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-300 ring-1 ring-white/10">
+              {{ tasks|length }} items
+            </span>
+          </div>
+
+          <form method="post" action="{{ url_for('add_task') }}" class="mt-4">
+            <label class="block text-sm text-slate-300">Tambah task</label>
+            <div class="mt-2 flex gap-2">
+              <input
+                name="description"
+                required
+                placeholder="Contoh: Fix bug login, review PR, deploy…"
+                class="w-full rounded-xl bg-slate-950/60 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-500 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                type="submit"
+                class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                Add
+              </button>
+            </div>
+          </form>
+
+          <div class="mt-6 space-y-3">
+            {% if tasks %}
+              {% for t in tasks %}
+                <div class="flex items-start justify-between gap-4 rounded-xl bg-slate-950/50 p-4 ring-1 ring-white/10">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      {% if t.done %}
+                        <span class="inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-300 ring-1 ring-emerald-500/20">
+                          Done
+                        </span>
+                      {% else %}
+                        <span class="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-xs text-amber-300 ring-1 ring-amber-500/20">
+                          Todo
+                        </span>
+                      {% endif %}
+                      <span class="truncate text-sm text-slate-100">{{ t.description }}</span>
+                    </div>
+                    <div class="mt-2 text-xs text-slate-400">
+                      {{ t.created_at.strftime("%Y-%m-%d %H:%M") }}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="rounded-xl border border-dashed border-white/10 bg-slate-950/20 p-6 text-sm text-slate-400">
+                Belum ada task. Tambahkan task pertama kamu di atas.
+              </div>
+            {% endif %}
+          </div>
+        </section>
+      </div>
+
+      <footer class="mt-10 text-xs text-slate-500">
+        <div class="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+          <span>Built with Flask + SQLAlchemy • Styled with Tailwind (CDN)</span>
+          <span>Database file: <code class="text-slate-300">dev_control.sqlite3</code> (otomatis dibuat)</span>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
